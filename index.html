@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RM3H บ้านพระราม 3 — แผนการทำงาน DMO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F2F3F0; --sheet:#FBFBF9; --ink:#22272B; --graphite:#666D73; --rule:#CDD2CE; --faint:#E4E7E3;
+  --red:#C23A2C; --blue:#3B5878; --blue-soft:#DCE4EE; --done:#3E7A55; --done-soft:#DDEBE1; --wip:#9A6B12; --wip-soft:#F3E8CF;
+  --font:"IBM Plex Sans Thai",Tahoma,"Leelawadee UI","Sukhumvit Set",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+  --paper:#16191B; --sheet:#1D2124; --ink:#E6E8E6; --graphite:#9AA1A6; --rule:#3A4044; --faint:#2A2F32;
+  --red:#E26A5B; --blue:#8FAED0; --blue-soft:#26323F; --done:#7DBF95; --done-soft:#1F3328; --wip:#D9AE5B; --wip-soft:#3A3120;
+}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 15px/1.6 var(--font)}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 60px}
+
+/* ---- Title block, drawn like a drawing sheet ---- */
+.sheet{background:var(--sheet);border:1.5px solid var(--ink);display:grid;grid-template-columns:1fr 360px}
+.sheet .name{padding:26px 28px 22px;border-right:1.5px solid var(--ink)}
+.name h1{margin:0;font-weight:700;font-size:clamp(38px,6vw,64px);line-height:1;letter-spacing:-.02em}
+.name p{margin:10px 0 0;font-size:17px;color:var(--graphite)}
+.tb{display:grid;grid-template-columns:1fr 1fr}
+.tb div{padding:9px 12px;border-bottom:1px solid var(--rule)}
+.tb div:nth-child(odd){border-right:1px solid var(--rule)}
+.tb div.full{grid-column:1/-1;border-right:0}
+.tb div:last-child{border-bottom:0}
+.tb small{display:block;font-size:11px;color:var(--graphite);line-height:1.3}
+.tb b{font-weight:600;font-size:14px;line-height:1.35;display:block}
+.tb .next b{color:var(--red)}
+.bar{height:5px;background:var(--faint);margin-top:6px}
+.bar i{display:block;height:100%;background:var(--done);width:0;transition:width .4s}
+
+/* ---- Sheet tabs ---- */
+nav{display:flex;gap:0;margin-top:22px;border-bottom:1.5px solid var(--ink);overflow-x:auto}
+nav button{background:none;border:1.5px solid transparent;border-bottom:0;padding:9px 16px;cursor:pointer;white-space:nowrap;color:var(--graphite);margin-bottom:-1.5px}
+nav button span{font-size:12px;margin-right:6px}
+nav button[aria-selected=true]{background:var(--sheet);border-color:var(--ink);color:var(--ink);font-weight:600}
+.view{display:none;background:var(--sheet);border:1.5px solid var(--ink);border-top:0;padding:22px 24px}
+.view.on{display:block}
+
+/* ---- Toolbar ---- */
+.tools{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-bottom:18px;font-size:14px}
+.tools select{background:var(--sheet);border:1px solid var(--rule);padding:5px 8px}
+.tools label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.tools .sp{flex:1}
+.btn{background:none;border:1px solid var(--rule);padding:5px 12px;cursor:pointer}
+.btn:hover{border-color:var(--ink)}
+
+/* ---- Timeline ---- */
+.month{font-weight:700;font-size:22px;margin:26px 0 4px;padding-bottom:6px;border-bottom:1.5px solid var(--ink)}
+.month:first-child{margin-top:0}
+.row{display:grid;grid-template-columns:78px 26px 1fr 150px;gap:0 14px;padding:12px 0;border-bottom:1px solid var(--faint);align-items:start}
+.row.hide{display:none}
+.d{line-height:1.1}
+.d b{font-size:24px;font-weight:600;display:block}
+.d small{font-size:12px;color:var(--graphite)}
+.d.wk b,.d.wk small{color:var(--red)}
+.datum{width:22px;height:22px;margin-top:4px}
+.datum svg{display:block}
+.t{min-width:0}
+.t .task{font-size:15px;line-height:1.5}
+.ms .task{font-weight:600}
+.meta{font-size:13px;color:var(--graphite);margin-top:3px}
+.meta .ph{color:var(--blue);font-weight:500}
+.redline{font-size:13px;color:var(--red);margin-top:4px;padding-left:10px;border-left:2px solid var(--red)}
+.side{text-align:right;font-size:13px}
+.side select{width:100%;border:1px solid var(--rule);background:var(--sheet);padding:4px 6px;font-size:13px}
+.cd{display:block;margin-top:5px;color:var(--graphite)}
+.cd.soon{color:var(--red);font-weight:600}
+.row.done .task{color:var(--graphite);text-decoration:line-through;text-decoration-color:var(--rule)}
+select.s-done{background:var(--done-soft);border-color:var(--done);color:var(--done)}
+select.s-wip{background:var(--wip-soft);border-color:var(--wip);color:var(--wip)}
+select.s-late{background:#F6DEDA;border-color:var(--red);color:var(--red)}
+@media (prefers-color-scheme:dark){select.s-late{background:#3A2422}}
+.empty{padding:30px 0;color:var(--graphite)}
+
+/* ---- Gantt ---- */
+.gwrap{overflow-x:auto;border:1px solid var(--rule)}
+.gantt{min-width:980px;position:relative}
+.ghead,.grow{display:grid;grid-template-columns:230px 1fr}
+.ghead{border-bottom:1.5px solid var(--ink);position:sticky;top:0;background:var(--sheet)}
+.weeks{display:grid;position:relative}
+.weeks div{font-size:11px;color:var(--graphite);padding:6px 0 6px 4px;border-left:1px solid var(--faint);white-space:nowrap}
+.weeks div.m{color:var(--ink);font-weight:600;border-left-color:var(--rule)}
+.glabel{padding:8px 12px;font-size:13px;line-height:1.35;border-right:1px solid var(--rule)}
+.glabel small{display:block;color:var(--blue);font-size:11px}
+.grow{border-bottom:1px solid var(--faint)}
+.track{position:relative;background-image:linear-gradient(to right,var(--faint) 1px,transparent 1px)}
+.gb{position:absolute;top:50%;height:14px;transform:translateY(-50%);background:var(--blue);min-width:6px}
+.gb.pt{background:none;width:16px!important;margin-left:-8px}
+.today{position:absolute;top:0;bottom:0;width:0;border-left:1.5px dashed var(--red);pointer-events:none;z-index:2}
+.today span{position:absolute;bottom:2px;left:4px;font-size:11px;color:var(--red);white-space:nowrap;background:var(--sheet);padding:0 3px}
+.legend{font-size:13px;color:var(--graphite);margin-top:12px}
+
+/* ---- Lists (risks / docs / mep) ---- */
+.item{display:grid;grid-template-columns:34px 1fr 140px;gap:4px 14px;padding:14px 0;border-bottom:1px solid var(--faint)}
+.item .n{font-weight:600;color:var(--graphite)}
+.item h3{margin:0;font-size:16px;font-weight:600;line-height:1.45}
+.item p{margin:4px 0 0;font-size:14px;color:var(--graphite)}
+.item p em{font-style:normal;color:var(--ink);font-weight:500}
+.item .fix{color:var(--ink)}
+.item select{width:100%;border:1px solid var(--rule);background:var(--sheet);padding:4px 6px;font-size:13px}
+.item input[type=text]{width:100%;border:0;border-bottom:1px solid var(--rule);background:transparent;padding:3px 0;font-size:13px;margin-top:6px}
+.count{font-size:14px;color:var(--graphite);margin-bottom:8px}
+.count b{color:var(--ink)}
+.grp{font-weight:700;font-size:18px;margin:22px 0 2px;padding-bottom:4px;border-bottom:1.5px solid var(--ink)}
+.grp:first-of-type{margin-top:4px}
+.foot{font-size:12px;color:var(--graphite);margin-top:18px}
+
+@media (max-width:820px){
+  .sheet{grid-template-columns:1fr}
+  .sheet .name{border-right:0;border-bottom:1.5px solid var(--ink)}
+  .row{grid-template-columns:58px 22px 1fr}
+  .side{grid-column:3;text-align:left;display:flex;gap:10px;align-items:center}
+  .side select{width:auto}
+  .cd{margin:0}
+  .item{grid-template-columns:28px 1fr}
+  .item .ctl{grid-column:2}
+  .view{padding:18px 14px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media print{
+  body{background:#fff}
+  nav,.tools,.btn{display:none!important}
+  .view{display:block!important;border:0;padding:0;page-break-before:always}
+  .view:first-of-type{page-break-before:auto}
+  .side select,.item select{border:0;appearance:none;-webkit-appearance:none;padding:0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="sheet">
+  <div class="name">
+    <h1>RM3H<br>บ้านพระราม 3</h1>
+    <p>แผนงานสถาปัตย์และ Interior ตั้งแต่ขออนุญาตจนเริ่มก่อสร้าง</p>
+  </div>
+  <div class="tb">
+    <div><small>ผู้ออกแบบ</small><b>DMO Architects &amp; Interior</b></div>
+    <div><small>ช่วงเวลา</small><b>ต.ค. 69 – ก.พ. 70</b></div>
+    <div><small>ลงเข็ม</small><b>1 ธ.ค. 69</b></div>
+    <div><small>เริ่มก่อสร้างงานหลัก</small><b>1 ก.พ. 70</b></div>
+    <div class="full next"><small>Milestone ถัดไป</small><b id="next">–</b></div>
+    <div class="full"><small>ความคืบหน้า</small><b id="prog">–</b><div class="bar"><i id="progbar"></i></div></div>
+  </div>
+</header>
+
+<nav role="tablist">
+  <button role="tab" aria-selected="true" data-v="tl"><span>A1</span>ไทม์ไลน์</button>
+  <button role="tab" aria-selected="false" data-v="gt"><span>A2</span>Gantt</button>
+  <button role="tab" aria-selected="false" data-v="rk"><span>A3</span>ความเสี่ยง</button>
+  <button role="tab" aria-selected="false" data-v="od"><span>A4</span>เอกสาร Owner</button>
+  <button role="tab" aria-selected="false" data-v="mp"><span>A5</span>Checklist งานระบบ</button>
+</nav>
+
+<section class="view on" id="tl">
+  <div class="tools">
+    <label>หมวดงาน <select id="fPh"><option value="">ทั้งหมด</option></select></label>
+    <label>ผู้รับผิดชอบ <select id="fBy"><option value="">ทุกฝ่าย</option></select></label>
+    <label><input type="checkbox" id="fMs"> เฉพาะ Milestone</label>
+    <label><input type="checkbox" id="fDone"> ซ่อนงานที่เสร็จ</label>
+    <span class="sp"></span>
+    <button class="btn" onclick="window.print()">พิมพ์</button>
+  </div>
+  <div id="tlList"></div>
+  <p class="foot">วันที่สีแดง = ตรงเสาร์/อาทิตย์ · เส้นแดงใต้งาน = ข้อเสนอปรับจากแผนเดิม · สถานะที่เลือกจะบันทึกไว้ในเบราว์เซอร์นี้</p>
+</section>
+
+<section class="view" id="gt">
+  <div class="gwrap"><div class="gantt" id="gantt"></div></div>
+  <p class="legend">แถบสีน้ำเงิน = ช่วงทำงาน · สัญลักษณ์ระดับ = วันเดียว · เส้นประสีแดง = วันนี้</p>
+</section>
+
+<section class="view" id="rk"><div id="rkList"></div></section>
+<section class="view" id="od"><div class="count" id="odCount"></div><div id="odList"></div></section>
+<section class="view" id="mp"><div class="count" id="mpCount"></div><div id="mpList"></div></section>
+
+<p class="foot" style="text-align:right"><button class="btn" id="reset">ล้างสถานะทั้งหมด</button></p>
+</div>
+
+<script>
+const DATA={"tl": [{"id": 1, "s": "2026-10-01", "e": "2026-10-02", "ph": "Owner Coord", "t": "แจ้ง owner: รายการเอกสารขออนุญาต, ให้หาฤกษ์ลงเข็ม (ธ.ค.) และฤกษ์ลงเสาเอก (กลาง ธ.ค.), ให้เริ่มคัดเลือก CM", "by": "DMO", "to": "Owner", "ms": false, "n": ""}, {"id": 2, "s": "2026-10-06", "e": "2026-10-06", "ph": "Permit", "t": "ส่งชุดขออนุญาตให้ owner และส่งให้วิศวกรโครงสร้างเป็นฐานทำผังเข็ม (Design Freeze ตำแหน่งเสา ระดับชั้น สระ)", "by": "DMO", "to": "Owner / วิศวกรโครงสร้าง", "ms": true, "n": "ห้ามขยับเสาหลังจากนี้"}, {"id": 3, "s": "2026-10-07", "e": "2026-10-08", "ph": "Permit", "t": "ตามเอกสาร owner ให้ครบ และลงนามทุกชุด", "by": "DMO / Owner", "to": "", "ms": false, "n": "ดู sheet Owner Docs"}, {"id": 4, "s": "2026-10-09", "e": "2026-10-16", "ph": "Permit", "t": "ยื่นขออนุญาตก่อสร้าง (เป้าหมาย ศ. 9 ต.ค. / ไม่ช้ากว่า ศ. 16 ต.ค.)", "by": "Owner", "to": "สำนักงานเขต", "ms": true, "n": "อ. 13 ต.ค. วันหยุด; 45 วันจาก 15 ต.ค. ≈ 29 พ.ย."}, {"id": 5, "s": "2026-10-19", "e": "2026-10-19", "ph": "Pile", "t": "วิศวกรโครงสร้างส่งผังเข็มรอบ 1 และประชุมตรวจ", "by": "วิศวกรโครงสร้าง / DMO", "to": "", "ms": false, "n": "เช็กผลเจาะสำรวจดิน"}, {"id": 6, "s": "2026-10-22", "e": "2026-10-22", "ph": "Interior", "t": "INTERIOR – Preliminary Design ครั้งที่ 1 (14.00 น.)", "by": "DMO Interior", "to": "Owner", "ms": true, "n": ""}, {"id": 7, "s": "2026-10-26", "e": "2026-10-26", "ph": "Pile", "t": "วิศวกรโครงสร้างส่งผังเข็มรอบ 2", "by": "วิศวกรโครงสร้าง", "to": "DMO", "ms": false, "n": ""}, {"id": 8, "s": "2026-10-28", "e": "2026-10-28", "ph": "CM", "t": "Owner เซ็นสัญญา CM (เป้าหมาย)", "by": "Owner", "to": "CM", "ms": false, "n": ""}, {"id": 9, "s": "2026-10-30", "e": "2026-10-30", "ph": "Pile", "t": "ส่งแบบชุดประมูลงานเข็ม", "by": "DMO", "to": "Owner / CM", "ms": true, "n": ""}, {"id": 10, "s": "2026-11-02", "e": "2026-11-02", "ph": "Pile Tender", "t": "CM เริ่มงาน และส่งหนังสือเชิญประมูลเข็ม", "by": "CM / Owner", "to": "ผู้รับเหมาเข็ม", "ms": false, "n": "1 พ.ย. ตรงวันอาทิตย์"}, {"id": 11, "s": "2026-11-03", "e": "2026-11-03", "ph": "Full Bid – MEP", "t": "ประชุมงานระบบรอบแรก (shaft, น้ำร้อน, ปั๊ม, ถังน้ำ, fresh air) โดยใช้ชุดขออนุญาตเป็นฐาน", "by": "DMO / วิศวกรงานระบบ", "to": "", "ms": false, "n": "เพิ่มใหม่ – ลดความเสี่ยงเวลาออกแบบงานระบบ"}, {"id": 12, "s": "2026-11-05", "e": "2026-11-05", "ph": "Interior", "t": "INTERIOR – Preliminary Design ครั้งที่ 2 (14.00 น.) + owner อนุมัติ layout (Layout Freeze)", "by": "DMO Interior", "to": "Owner", "ms": true, "n": ""}, {"id": 13, "s": "2026-11-06", "e": "2026-11-06", "ph": "Pile Tender", "t": "ชี้แจงหน้างานผู้รับเหมาเข็ม (ช่วงเช้า)", "by": "CM / DMO", "to": "ผู้รับเหมาเข็ม", "ms": false, "n": ""}, {"id": 14, "s": "2026-11-06", "e": "2026-11-06", "ph": "Full Bid – Struct", "t": "ส่งแปลนทุกชั้น / ผังบริเวณ / รูปตัด / แบบขยายบันได / แบบขยายสระ ให้วิศวกรโครงสร้าง", "by": "DMO", "to": "วิศวกรโครงสร้าง", "ms": false, "n": ""}, {"id": 15, "s": "2026-11-06", "e": "2026-11-06", "ph": "Full Bid – Pool", "t": "ส่งแบบขยายสระว่ายน้ำให้ Supplier สระ", "by": "DMO", "to": "Supplier สระ", "ms": false, "n": ""}, {"id": 16, "s": "2026-11-12", "e": "2026-11-12", "ph": "Full Bid – MEP", "t": "ส่งแบบแปลนขยายห้องน้ำ / ผังไฟ + แอร์ / ผังปลั๊ก ให้วิศวกรงานระบบ", "by": "DMO", "to": "วิศวกรงานระบบ", "ms": false, "n": "เสนอเลื่อนเร็วขึ้นจาก 13 พ.ย."}, {"id": 17, "s": "2026-11-13", "e": "2026-11-13", "ph": "Full Bid – Struct", "t": "ส่งแบบดีเทลที่เกี่ยวกับโครงสร้าง (Skylight Detail, ผนัง Glass Block ฯลฯ)", "by": "DMO", "to": "วิศวกรโครงสร้าง", "ms": false, "n": ""}, {"id": 18, "s": "2026-11-13", "e": "2026-11-13", "ph": "Full Bid – AC", "t": "ส่งผังแอร์ให้ Daikin (VRV / Fresh Air)", "by": "DMO", "to": "Daikin", "ms": false, "n": ""}, {"id": 19, "s": "2026-11-13", "e": "2026-11-13", "ph": "Full Bid – MEP", "t": "ประชุม online วิศวกรงานระบบ ชี้แจงแบบ / Shaft + ส่ง Checklist", "by": "DMO", "to": "วิศวกรงานระบบ", "ms": true, "n": "14 พ.ย. ตรงวันเสาร์; ดู sheet MEP Checklist"}, {"id": 20, "s": "2026-11-13", "e": "2026-11-13", "ph": "Pile Tender", "t": "ปิดรับซองประมูลเข็ม", "by": "CM", "to": "", "ms": false, "n": ""}, {"id": 21, "s": "2026-11-16", "e": "2026-11-18", "ph": "Full Bid – Pool", "t": "Supplier สระส่งแบบระบบกลับ (ห้องเครื่อง, balance tank, น้ำหนัก) → ส่งต่อวิศวกร", "by": "Supplier สระ", "to": "DMO / วิศวกร", "ms": false, "n": ""}, {"id": 22, "s": "2026-11-16", "e": "2026-11-19", "ph": "Pile Tender", "t": "วิเคราะห์ราคาและต่อรองผู้รับเหมาเข็ม", "by": "CM", "to": "Owner", "ms": false, "n": ""}, {"id": 23, "s": "2026-11-17", "e": "2026-11-17", "ph": "SPEC", "t": "ส่ง finish schedule / material list ร่างให้พี่เมย์", "by": "DMO", "to": "พี่เมย์", "ms": false, "n": "เพิ่มใหม่ – ให้มีเวลาทำ SPEC"}, {"id": 24, "s": "2026-11-20", "e": "2026-11-20", "ph": "Full Bid – Arch", "t": "แบบประตูหน้าต่างเสร็จ", "by": "DMO", "to": "", "ms": false, "n": ""}, {"id": 25, "s": "2026-11-20", "e": "2026-11-20", "ph": "Full Bid – AC", "t": "Daikin ส่งแบบ VRV กลับ", "by": "Daikin", "to": "DMO / วิศวกรงานระบบ", "ms": false, "n": ""}, {"id": 26, "s": "2026-11-20", "e": "2026-11-20", "ph": "Pile Tender", "t": "ประกาศผลผู้รับเหมาเข็ม", "by": "Owner / CM", "to": "ผู้รับเหมาเข็ม", "ms": true, "n": ""}, {"id": 27, "s": "2026-11-23", "e": "2026-11-23", "ph": "Full Bid – Eng", "t": "วิศวกรโครงสร้างและงานระบบส่งแบบชุดประมูล + Blank BOQ", "by": "วิศวกรโครงสร้าง / งานระบบ", "to": "DMO", "ms": true, "n": ""}, {"id": 28, "s": "2026-11-23", "e": "2026-11-23", "ph": "TOR", "t": "สถาปนิกส่งร่าง TOR ให้ owner ตรวจทาน", "by": "DMO", "to": "Owner", "ms": false, "n": ""}, {"id": 29, "s": "2026-11-24", "e": "2026-11-24", "ph": "SPEC", "t": "นัดพี่เมย์ทบทวน SPEC งานสถาปัตย์", "by": "DMO / พี่เมย์", "to": "", "ms": false, "n": ""}, {"id": 30, "s": "2026-11-24", "e": "2026-11-24", "ph": "Pile Tender", "t": "เซ็นสัญญาผู้รับเหมาเข็ม", "by": "Owner", "to": "ผู้รับเหมาเข็ม", "ms": false, "n": ""}, {"id": 31, "s": "2026-11-25", "e": "2026-11-27", "ph": "Full Bid – Check", "t": "สถาปนิกตรวจแบบวิศวกรและส่ง Feedback", "by": "DMO", "to": "วิศวกร", "ms": false, "n": "เลื่อนจาก 26–28 พ.ย. (28 ตรงวันเสาร์)"}, {"id": 32, "s": "2026-11-25", "e": "2026-11-27", "ph": "Pile Prep", "t": "สำรวจสภาพอาคารข้างเคียง (ถ่ายภาพ), ทำรั้ว, ไฟและน้ำชั่วคราว", "by": "ผู้รับเหมาเข็ม / CM", "to": "", "ms": false, "n": ""}, {"id": 33, "s": "2026-11-26", "e": "2026-11-26", "ph": "TOR", "t": "Owner ส่งคอมเมนต์ TOR กลับ", "by": "Owner", "to": "DMO", "ms": false, "n": ""}, {"id": 34, "s": "2026-11-30", "e": "2026-11-30", "ph": "Full Bid", "t": "ส่งแบบชุดประมูลฉบับสมบูรณ์: แบบทุกหมวด, SPEC, TOR final, Blank BOQ", "by": "DMO", "to": "Owner / CM", "ms": true, "n": ""}, {"id": 35, "s": "2026-11-30", "e": "2026-11-30", "ph": "Permit", "t": "เป้าหมาย: ได้ใบอนุญาตก่อสร้าง", "by": "Owner / เขต", "to": "", "ms": true, "n": ""}, {"id": 36, "s": "2026-12-01", "e": "2026-12-01", "ph": "Pile Works", "t": "เริ่มลงเข็ม (ต้องมีใบอนุญาต + แจ้งผู้ควบคุมงานแล้ว) / พิธีตามฤกษ์", "by": "ผู้รับเหมาเข็ม", "to": "", "ms": true, "n": ""}, {"id": 37, "s": "2026-12-02", "e": "2026-12-04", "ph": "Main Tender", "t": "CM ส่งเอกสารประกวดราคางานหลัก", "by": "CM", "to": "ผู้เข้าประมูล", "ms": false, "n": ""}, {"id": 38, "s": "2026-12-09", "e": "2026-12-09", "ph": "Main Tender", "t": "ชี้แจงหน้างานผู้เข้าประมูล", "by": "CM / DMO", "to": "ผู้เข้าประมูล", "ms": false, "n": ""}, {"id": 39, "s": "2026-12-14", "e": "2026-12-18", "ph": "Ceremony", "t": "พิธีลงเสาเอก (ตามฤกษ์ owner)", "by": "Owner", "to": "", "ms": true, "n": "แจ้ง owner ล่วงหน้า"}, {"id": 40, "s": "2026-12-16", "e": "2026-12-16", "ph": "Main Tender", "t": "ปิดรับคำถาม", "by": "CM", "to": "", "ms": false, "n": ""}, {"id": 41, "s": "2026-12-21", "e": "2026-12-21", "ph": "Main Tender", "t": "ส่ง Addendum", "by": "CM / DMO", "to": "ผู้เข้าประมูล", "ms": false, "n": ""}, {"id": 42, "s": "2026-12-21", "e": "2026-12-31", "ph": "Pile Works", "t": "งานเข็มเสร็จ + ทดสอบเข็ม (ประมาณการ)", "by": "ผู้รับเหมาเข็ม / CM", "to": "", "ms": false, "n": ""}, {"id": 43, "s": "2027-01-08", "e": "2027-01-08", "ph": "Main Tender", "t": "ยื่นซองประมูล (เผื่อช่วงปีใหม่)", "by": "ผู้เข้าประมูล", "to": "CM", "ms": true, "n": ""}, {"id": 44, "s": "2027-01-11", "e": "2027-01-22", "ph": "Main Tender", "t": "CM วิเคราะห์ราคา, DMO ตรวจด้านเทคนิค, ต่อรอง", "by": "CM / DMO", "to": "Owner", "ms": false, "n": ""}, {"id": 45, "s": "2027-01-25", "e": "2027-01-29", "ph": "Main Tender", "t": "ประกาศผลและเซ็นสัญญา", "by": "Owner", "to": "ผู้รับเหมาหลัก", "ms": false, "n": ""}, {"id": 46, "s": "2027-02-01", "e": "2027-02-01", "ph": "Construction", "t": "เริ่มก่อสร้างงานหลัก", "by": "ผู้รับเหมาหลัก", "to": "", "ms": true, "n": ""}], "gantt": [{"ph": "Owner / CM", "t": "คัดเลือกและจ้าง CM", "s": "2026-10-01", "e": "2026-10-30"}, {"ph": "Permit", "t": "ยื่นขออนุญาต → ได้ใบอนุญาต", "s": "2026-10-06", "e": "2026-11-30"}, {"ph": "Pile", "t": "ออกแบบผังเข็ม + ชุดประมูลเข็ม", "s": "2026-10-06", "e": "2026-10-30"}, {"ph": "Interior", "t": "Preliminary Design ครั้งที่ 1–2", "s": "2026-10-06", "e": "2026-11-05"}, {"ph": "Pile Tender", "t": "ประมูล + เซ็นสัญญาเข็ม", "s": "2026-11-02", "e": "2026-11-24"}, {"ph": "Full Bid – Struct", "t": "ออกแบบโครงสร้างชุดประมูล", "s": "2026-11-06", "e": "2026-11-23"}, {"ph": "Full Bid – MEP", "t": "ออกแบบงานระบบ + Daikin", "s": "2026-11-03", "e": "2026-11-23"}, {"ph": "Full Bid – Pool", "t": "Supplier สระ", "s": "2026-11-06", "e": "2026-11-18"}, {"ph": "Full Bid – Arch", "t": "ประตูหน้าต่าง / ดีเทล / ชุดสถาปัตย์", "s": "2026-11-06", "e": "2026-11-30"}, {"ph": "SPEC", "t": "SPEC งานสถาปัตย์ (พี่เมย์)", "s": "2026-11-17", "e": "2026-11-30"}, {"ph": "TOR", "t": "ร่าง TOR + owner ตรวจทาน", "s": "2026-11-23", "e": "2026-11-30"}, {"ph": "Pile Prep", "t": "เตรียมหน้างานเข็ม", "s": "2026-11-25", "e": "2026-11-30"}, {"ph": "Pile Works", "t": "งานเข็ม + ทดสอบ", "s": "2026-12-01", "e": "2026-12-31"}, {"ph": "Ceremony", "t": "พิธีลงเสาเอก", "s": "2026-12-14", "e": "2026-12-18"}, {"ph": "Main Tender", "t": "ประกวดราคางานหลัก", "s": "2026-12-02", "e": "2027-01-29"}, {"ph": "Construction", "t": "เริ่มก่อสร้างงานหลัก", "s": "2027-02-01", "e": "2027-02-01"}], "risks": [{"t": "ใบอนุญาตเป็น critical path ของงานเข็ม", "impact": "ถ้ายื่นกลาง ต.ค. + 45 วัน ≈ 29 พ.ย. แทบไม่มี buffer และเขตขยายเวลาได้ → ลงเข็ม 1 ธ.ค. ไม่ได้", "fix": "ยื่นภายใน ศ. 9 ต.ค. (ไม่ช้ากว่า 16 ต.ค.); พิจารณายื่นแจ้งตามมาตรา 39 ทวิ (เช็กเงื่อนไขกับเขต); ถ้ามีสิ่งปลูกสร้างเดิมให้ยื่นรื้อถอนพร้อมกัน", "by": "Owner / DMO"}, {"t": "ชุดขออนุญาต 6 ต.ค. = Design Freeze โครงสร้าง", "impact": "ถ้าขยับเสา ระดับชั้น หรือสระหลังนี้ ผังเข็มต้องแก้", "fix": "ล็อกตำแหน่งเสา ระดับชั้น ตำแหน่ง/ความลึกสระ; เช็กผลเจาะสำรวจดิน ถ้ายังไม่มีให้สั่งทันที", "by": "DMO / Owner"}, {"t": "เวลาประมูลเข็มสั้น (30 ต.ค. → 1 ธ.ค.)", "impact": "ไม่มีเวลาคัดเลือก/ทำสัญญา/เตรียมหน้างาน", "fix": "Owner คัด CM ตั้งแต่กลาง ต.ค. ให้เซ็นภายใน 30 ต.ค.; DMO เตรียม shortlist ผู้รับเหมาเข็ม 3–4 ราย", "by": "Owner / CM"}, {"t": "Interior Prelim 2 ห่างจากผังไฟ/แอร์/ปลั๊ก 6 วันทำการ", "impact": "layout ไม่นิ่ง → ผังไฟและงานระบบต้องแก้", "fix": "ให้ owner อนุมัติ furniture layout ใน Prelim 2 (Layout Freeze); built-in แยกประมูล ใส่ provisional sum + rough-in ในชุดหลัก", "by": "Owner / DMO Interior"}, {"t": "วิศวกรงานระบบมีเวลาออกแบบ ~10 วัน", "impact": "แบบงานระบบไม่ครบ / Blank BOQ ไม่สมบูรณ์", "fix": "นัดประชุมงานระบบรอบแรก 3 พ.ย. จบเรื่อง shaft, ห้องปั๊ม, ถังน้ำ, น้ำร้อน, fresh air ก่อน", "by": "DMO"}, {"t": "วันที่ตรงเสาร์/อาทิตย์", "impact": "นัดหมาย/ส่งงานคลาดเคลื่อน", "fix": "1 พ.ย. (อา.) → 2 พ.ย.; 14 พ.ย. (ส.) → 13 พ.ย.; 26–28 พ.ย. → 25–27 พ.ย.", "by": "DMO"}, {"t": "SPEC มีเวลา 6 วันหลังนัดพี่เมย์", "impact": "SPEC ไม่ทัน 30 พ.ย.", "fix": "ส่ง finish schedule / material list ร่างให้พี่เมย์ 17 พ.ย.", "by": "DMO"}, {"t": "Blank BOQ งานสถาปัตย์", "impact": "ยังไม่ระบุผู้จัดทำ/รวบรวม", "fix": "กำหนดผู้รับผิดชอบ (CM / QS / DMO) ให้ชัด", "by": "Owner / DMO"}], "docs": [{"t": "แบบคำขอ ข.1 ลงนามแล้ว", "by": "Owner", "when": "ทุกกรณี"}, {"t": "สำเนาโฉนดขนาดเท่าต้นฉบับทุกหน้า + รับรองสำเนา", "by": "Owner", "when": "ทุกกรณี"}, {"t": "สำเนาบัตรประชาชน + ทะเบียนบ้าน ผู้ขอและเจ้าของที่ดิน", "by": "Owner", "when": "ทุกกรณี"}, {"t": "หนังสือยินยอมให้ปลูกสร้างในที่ดิน", "by": "Owner", "when": "ผู้ขอไม่ใช่เจ้าของที่ดิน"}, {"t": "หนังสือมอบอำนาจ + อากรแสตมป์", "by": "Owner", "when": "ให้ตัวแทนยื่น"}, {"t": "หนังสือรับรองนิติบุคคล", "by": "Owner", "when": "ผู้ขอเป็นบริษัท"}, {"t": "หนังสือยินยอมจากเพื่อนบ้าน (ผนังชิดเขต)", "by": "Owner", "when": "ถ้ามี"}, {"t": "เอกสารทางเข้าออก (ภาระจำยอม / ทางส่วนบุคคล)", "by": "Owner", "when": "ถ้ามี"}, {"t": "คำขอรื้อถอนสิ่งปลูกสร้างเดิม", "by": "Owner / DMO", "when": "ถ้ามีสิ่งปลูกสร้างเดิม"}, {"t": "แบบชุดขออนุญาต", "by": "DMO", "when": "ทุกกรณี"}, {"t": "หนังสือรับรองผู้ออกแบบ + สำเนาใบอนุญาตประกอบวิชาชีพ (สถาปนิก/วิศวกร)", "by": "DMO / วิศวกร", "when": "ทุกกรณี"}, {"t": "รายการคำนวณโครงสร้าง", "by": "วิศวกรโครงสร้าง", "when": "ทุกกรณี"}, {"t": "หนังสือยินยอมเป็นผู้ควบคุมงาน", "by": "Owner / CM", "when": "ก่อนเริ่มงาน"}, {"t": "ยื่นขอไฟฟ้าชั่วคราว (การไฟฟ้านครหลวง)", "by": "Owner", "when": "ต้น พ.ย. 69"}, {"t": "ฤกษ์ลงเข็ม (ธ.ค.) และฤกษ์ลงเสาเอก (กลาง ธ.ค.)", "by": "Owner", "when": "แจ้งล่วงหน้า"}], "mep": [{"t": "ก๊อกน้ำมีทุกระเบียง", "src": "Moddy"}, {"t": "ตำแหน่ง FD ครบหรือไม่", "src": "Moddy"}, {"t": "สุขภัณฑ์/ก๊อกแบบ sensor (automatic) หรือไม่", "src": "Moddy"}, {"t": "ระบบน้ำร้อนเป็นแบบใด", "src": "Moddy"}, {"t": "วาล์วห้องน้ำอยู่ใต้ซิงค์ในแบบ", "src": "Moddy"}, {"t": "แรงดันปั๊มได้ 4 bar", "src": "Moddy"}, {"t": "ระบบสายล่อฟ้าต้องมีหรือไม่", "src": "Moddy"}, {"t": "ขนาดถังเก็บน้ำเพียงพอสำหรับ Landscape หรือไม่", "src": "Moddy"}, {"t": "ระบบ Fresh Air", "src": "Moddy"}, {"t": "ตำแหน่งและขนาด Shaft", "src": "Moddy"}, {"t": "ขนาดมิเตอร์ไฟฟ้าและประปาถาวร", "src": "เพิ่มเติม"}, {"t": "ถังบำบัดและบ่อดักไขมัน", "src": "เพิ่มเติม"}, {"t": "ระบายน้ำฝน / ระดับพื้นเทียบระดับน้ำท่วม / sump pump", "src": "เพิ่มเติม"}, {"t": "ท่อเผื่อ EV charger", "src": "เพิ่มเติม"}, {"t": "ท่อเผื่อ solar rooftop", "src": "เพิ่มเติม"}, {"t": "ท่อ CCTV / Data / Smart home", "src": "เพิ่มเติม"}, {"t": "การระบายน้ำ backwash ห้องเครื่องสระ", "src": "เพิ่มเติม"}]};
+const KEY="rm3h-plan-v1";
+let st={};
+try{st=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){st={}}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
+const get=(k,d)=>st[k]??d;
+const set=(k,v)=>{st[k]=v;save()};
+
+const DAY=["อา.","จ.","อ.","พ.","พฤ.","ศ.","ส."];
+const MON=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+const P=s=>{const[a,b,c]=s.split("-").map(Number);return new Date(a,b-1,c)};
+const be=d=>String(d.getFullYear()+543).slice(2);
+const fmt=d=>`${d.getDate()} ${MON[d.getMonth()]} ${be(d)}`;
+const today=(()=>{const n=new Date();return new Date(n.getFullYear(),n.getMonth(),n.getDate())})();
+const diff=d=>Math.round((d-today)/864e5);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const datum=c=>`<svg viewBox="0 0 22 22" width="22" height="22" aria-label="Milestone"><line x1="1" y1="5" x2="21" y2="5" stroke="${c}" stroke-width="1.5"/><path d="M5 5 L17 5 L11 15 Z" fill="${c}"/></svg>`;
+
+/* ---------- tabs ---------- */
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("nav button").forEach(x=>x.setAttribute("aria-selected",x===b));
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on",v.id===b.dataset.v));
+});
+
+/* ---------- timeline ---------- */
+const STAT=["ยังไม่เริ่ม","กำลังทำ","เสร็จ","เลื่อน"];
+const scls={"เสร็จ":"s-done","กำลังทำ":"s-wip","เลื่อน":"s-late"};
+const phs=[...new Set(DATA.tl.map(r=>r.ph))];
+const bys=[...new Set(DATA.tl.flatMap(r=>r.by.split("/").map(s=>s.trim())))];
+phs.forEach(p=>fPh.insertAdjacentHTML("beforeend",`<option>${esc(p)}</option>`));
+bys.forEach(p=>fBy.insertAdjacentHTML("beforeend",`<option>${esc(p)}</option>`));
+
+function renderTL(){
+  let html="",lastM="";
+  DATA.tl.forEach(r=>{
+    const s=P(r.s),e=P(r.e),m=`${MON[s.getMonth()]} ${be(s)}`;
+    if(m!==lastM){html+=`<div class="month">${m}</div>`;lastM=m}
+    const wk=s.getDay()===0||s.getDay()===6||e.getDay()===0||e.getDay()===6;
+    const range=r.s!==r.e?`<small>– ${e.getDate()} ${MON[e.getMonth()]}</small>`:"";
+    const sv=get("tl"+r.id,"ยังไม่เริ่ม");
+    html+=`<div class="row${r.ms?" ms":""}" data-id="${r.id}">
+      <div class="d${wk?" wk":""}"><b>${s.getDate()}</b><small>${DAY[s.getDay()]} ${MON[s.getMonth()]}</small>${range?"<br>"+range:""}</div>
+      <div class="datum">${r.ms?datum("var(--red)"):""}</div>
+      <div class="t"><div class="task">${esc(r.t)}</div>
+        <div class="meta"><span class="ph">${esc(r.ph)}</span> &nbsp;${esc(r.by)}${r.to?" &nbsp;ส่งถึง "+esc(r.to):""}</div>
+        ${r.n?`<div class="redline">${esc(r.n)}</div>`:""}</div>
+      <div class="side"><select aria-label="สถานะ">${STAT.map(x=>`<option${x===sv?" selected":""}>${x}</option>`).join("")}</select><span class="cd"></span></div>
+    </div>`;
+  });
+  tlList.innerHTML=html;
+  tlList.querySelectorAll(".row").forEach(row=>{
+    const sel=row.querySelector("select");
+    sel.onchange=()=>{set("tl"+row.dataset.id,sel.value);paintRow(row);applyFilter();summary()};
+    paintRow(row);
+  });
+  applyFilter();
+}
+function paintRow(row){
+  const r=DATA.tl.find(x=>x.id==row.dataset.id),sel=row.querySelector("select"),cd=row.querySelector(".cd");
+  sel.className=scls[sel.value]||"";
+  row.classList.toggle("done",sel.value==="เสร็จ");
+  const n=diff(P(r.s)),ne=diff(P(r.e));
+  if(sel.value==="เสร็จ"){cd.textContent="เสร็จแล้ว";cd.className="cd"}
+  else if(n>0){cd.textContent=`อีก ${n} วัน`;cd.className="cd"+(n<=7?" soon":"")}
+  else if(ne>=0){cd.textContent="ช่วงนี้";cd.className="cd soon"}
+  else{cd.textContent=`เลยมา ${-ne} วัน`;cd.className="cd soon"}
+}
+function applyFilter(){
+  const ph=fPh.value,by=fBy.value,ms=fMs.checked,hd=fDone.checked;let shown=0;
+  tlList.querySelectorAll(".row").forEach(row=>{
+    const r=DATA.tl.find(x=>x.id==row.dataset.id);
+    const ok=(!ph||r.ph===ph)&&(!by||r.by.split("/").map(s=>s.trim()).includes(by))&&(!ms||r.ms)&&(!hd||get("tl"+r.id)!=="เสร็จ");
+    row.classList.toggle("hide",!ok);if(ok)shown++;
+  });
+  tlList.querySelectorAll(".month").forEach(m=>{
+    let n=m.nextElementSibling,any=false;
+    while(n&&!n.classList.contains("month")){if(!n.classList.contains("hide"))any=true;n=n.nextElementSibling}
+    m.style.display=any?"":"none";
+  });
+  let em=tlList.querySelector(".empty");
+  if(!shown&&!em)tlList.insertAdjacentHTML("beforeend",`<div class="empty">ไม่มีงานที่ตรงกับตัวกรองนี้ ลองเปลี่ยนหมวดงานหรือผู้รับผิดชอบ</div>`);
+  if(shown&&em)em.remove();
+}
+[fPh,fBy,fMs,fDone].forEach(el=>el.onchange=applyFilter);
+
+function summary(){
+  const tot=DATA.tl.length,done=DATA.tl.filter(r=>get("tl"+r.id)==="เสร็จ").length;
+  prog.textContent=`เสร็จ ${done} จาก ${tot} งาน`;progbar.style.width=(done/tot*100)+"%";
+  const nx=DATA.tl.find(r=>r.ms&&diff(P(r.e))>=0&&get("tl"+r.id)!=="เสร็จ");
+  next.textContent=nx?`${fmt(P(nx.s))} ${nx.t.length>60?nx.t.slice(0,58)+"…":nx.t} (${diff(P(nx.s))<=0?"ช่วงนี้":"อีก "+diff(P(nx.s))+" วัน"})`:"ครบทุก Milestone แล้ว";
+}
+
+/* ---------- gantt ---------- */
+function renderGantt(){
+  const start=P("2026-09-28"),W=19,end=new Date(start);end.setDate(end.getDate()+W*7);
+  const span=(end-start)/864e5,pct=d=>((d-start)/864e5)/span*100;
+  let head=`<div class="ghead"><div class="glabel"><b>หมวดงาน</b></div><div class="weeks" style="grid-template-columns:repeat(${W},1fr)">`;
+  let prevM=-1;
+  for(let i=0;i<W;i++){const d=new Date(start);d.setDate(d.getDate()+i*7);const nm=d.getMonth()!==prevM;prevM=d.getMonth();
+    head+=`<div class="${nm?"m":""}">${nm?MON[d.getMonth()]:d.getDate()}</div>`}
+  head+="</div></div>";
+  let rows="";
+  DATA.gantt.forEach(g=>{
+    const s=P(g.s),e=P(g.e);e.setDate(e.getDate()+1);
+    const single=g.s===g.e;
+    const bar=single?`<div class="gb pt" style="left:${pct(s)}%" title="${esc(g.t)} ${fmt(s)}">${datum("var(--blue)")}</div>`
+      :`<div class="gb" style="left:${pct(s)}%;width:${pct(e)-pct(s)}%" title="${esc(g.t)} ${fmt(s)} – ${fmt(P(g.e))}"></div>`;
+    rows+=`<div class="grow"><div class="glabel">${esc(g.t)}<small>${esc(g.ph)} &nbsp;${fmt(s)}${single?"":" – "+fmt(P(g.e))}</small></div>
+      <div class="track" style="background-size:${100/W}% 100%">${bar}</div></div>`;
+  });
+  const tp=pct(today);
+  const line=(tp>=0&&tp<=100)?`<div class="today" style="left:calc(230px + (100% - 230px) * ${tp/100})"><span>วันนี้</span></div>`:"";
+  gantt.innerHTML=head+rows+line;
+}
+
+/* ---------- lists ---------- */
+function selHTML(opts,v){return `<select>${opts.map(x=>`<option${x===v?" selected":""}>${x}</option>`).join("")}</select>`}
+function colorSel(sel,map){sel.className=map[sel.value]||""}
+
+function renderRisks(){
+  const O=["เปิด","กำลังแก้","ปิดแล้ว"],M={"ปิดแล้ว":"s-done","กำลังแก้":"s-wip","เปิด":"s-late"};
+  rkList.innerHTML=DATA.risks.map((r,i)=>`<div class="item"><div class="n">${i+1}</div>
+    <div><h3>${esc(r.t)}</h3><p><em>ผลกระทบ</em> ${esc(r.impact)}</p><p class="fix"><em>ข้อเสนอ</em> ${esc(r.fix)}</p><p><em>ผู้ตัดสินใจ</em> ${esc(r.by)}</p></div>
+    <div class="ctl" data-k="rk${i}">${selHTML(O,get("rk"+i,"เปิด"))}</div></div>`).join("");
+  rkList.querySelectorAll(".ctl").forEach(c=>{const s=c.querySelector("select");colorSel(s,M);s.onchange=()=>{set(c.dataset.k,s.value);colorSel(s,M)}});
+}
+function renderDocs(){
+  const O=["ยังไม่เริ่ม","กำลังตาม","ได้รับแล้ว","ไม่ใช้"],M={"ได้รับแล้ว":"s-done","กำลังตาม":"s-wip"};
+  odList.innerHTML=DATA.docs.map((r,i)=>`<div class="item"><div class="n">${i+1}</div>
+    <div><h3>${esc(r.t)}</h3><p>${esc(r.by)} &nbsp;ใช้เมื่อ ${esc(r.when)}</p></div>
+    <div class="ctl" data-k="od${i}">${selHTML(O,get("od"+i,"ยังไม่เริ่ม"))}</div></div>`).join("");
+  const cnt=()=>{const v=DATA.docs.map((_,i)=>get("od"+i,"ยังไม่เริ่ม"));
+    odCount.innerHTML=`ได้รับแล้ว <b>${v.filter(x=>x==="ได้รับแล้ว").length}</b> จาก <b>${v.filter(x=>x!=="ไม่ใช้").length}</b> รายการ ส่งชุดขออนุญาต 6 ต.ค. 69 เป้าหมายยื่น 9 ต.ค. (ไม่เกิน 16 ต.ค.)`};
+  odList.querySelectorAll(".ctl").forEach(c=>{const s=c.querySelector("select");colorSel(s,M);s.onchange=()=>{set(c.dataset.k,s.value);colorSel(s,M);cnt()}});cnt();
+}
+function renderMep(){
+  const O=["รอตรวจ","ครบ","ต้องแก้","ไม่ใช้"],M={"ครบ":"s-done","ต้องแก้":"s-late"};
+  let html="",g="";
+  DATA.mep.forEach((r,i)=>{
+    const grp=r.src==="Moddy"?"รายการจากแผนเดิม":"รายการที่เพิ่มเติม";
+    if(grp!==g){html+=`<div class="grp">${grp}</div>`;g=grp}
+    html+=`<div class="item"><div class="n">${i+1}</div><div><h3>${esc(r.t)}</h3>
+      <input type="text" placeholder="คำตอบ / หมายเหตุจากวิศวกร" data-k="mpn${i}" value="${esc(get("mpn"+i,""))}"></div>
+      <div class="ctl" data-k="mp${i}">${selHTML(O,get("mp"+i,"รอตรวจ"))}</div></div>`;
+  });
+  mpList.innerHTML=html;
+  const cnt=()=>{const v=DATA.mep.map((_,i)=>get("mp"+i,"รอตรวจ"));
+    mpCount.innerHTML=`ครบ <b>${v.filter(x=>x==="ครบ").length}</b> ต้องแก้ <b>${v.filter(x=>x==="ต้องแก้").length}</b> จาก <b>${v.length}</b> รายการ ส่งวิศวกรพร้อมนัด online 13 พ.ย. 69`};
+  mpList.querySelectorAll(".ctl").forEach(c=>{const s=c.querySelector("select");colorSel(s,M);s.onchange=()=>{set(c.dataset.k,s.value);colorSel(s,M);cnt()}});
+  mpList.querySelectorAll("input[type=text]").forEach(inp=>inp.oninput=()=>set(inp.dataset.k,inp.value));cnt();
+}
+
+reset.onclick=()=>{if(confirm("ล้างสถานะและหมายเหตุทั้งหมดที่บันทึกไว้?")){st={};save();init()}};
+function init(){renderTL();renderGantt();renderRisks();renderDocs();renderMep();summary()}
+init();
+</script>
+</body>
+</html>
