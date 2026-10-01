@@ -2,6 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
+<meta name="color-scheme" content="light">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RM3H บ้านพระราม 3 — แผนการทำงาน DMO</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -9,16 +10,12 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --paper:#F2F3F0; --sheet:#FBFBF9; --ink:#22272B; --graphite:#666D73; --rule:#CDD2CE; --faint:#E4E7E3;
+  --paper:#E9EBE8; --sheet:#FBFBF9; --ink:#22272B; --graphite:#666D73; --rule:#CDD2CE; --faint:#E4E7E3;
   --red:#C23A2C; --blue:#3B5878; --blue-soft:#DCE4EE; --done:#3E7A55; --done-soft:#DDEBE1; --wip:#9A6B12; --wip-soft:#F3E8CF;
   --font:"IBM Plex Sans Thai",Tahoma,"Leelawadee UI","Sukhumvit Set",sans-serif;
 }
-@media (prefers-color-scheme:dark){:root{
-  --paper:#16191B; --sheet:#1D2124; --ink:#E6E8E6; --graphite:#9AA1A6; --rule:#3A4044; --faint:#2A2F32;
-  --red:#E26A5B; --blue:#8FAED0; --blue-soft:#26323F; --done:#7DBF95; --done-soft:#1F3328; --wip:#D9AE5B; --wip-soft:#3A3120;
-}}
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;color-scheme:light}
 body{margin:0;background:var(--paper);color:var(--ink);font:400 15px/1.6 var(--font)}
 button,select,input{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--blue);outline-offset:2px}
@@ -81,7 +78,6 @@ nav button[aria-selected=true]{background:var(--sheet);border-color:var(--ink);c
 select.s-done{background:var(--done-soft);border-color:var(--done);color:var(--done)}
 select.s-wip{background:var(--wip-soft);border-color:var(--wip);color:var(--wip)}
 select.s-late{background:#F6DEDA;border-color:var(--red);color:var(--red)}
-@media (prefers-color-scheme:dark){select.s-late{background:#3A2422}}
 .empty{padding:30px 0;color:var(--graphite)}
 
 /* ---- Gantt ---- */
